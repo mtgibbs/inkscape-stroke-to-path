@@ -26,10 +26,10 @@ def main(args):
             '--verb="ToolNode"',
             '--select="%s"' % (GIVEN_PATH_ID),
             '--verb="StrokeToPath"',
-            '--verb="FileSave"'
-            ]
-        #cmd = ' '.join(cmd)
-        #subprocess.run(cmd, shell=True, check=True)
+            '--verb="FileSave"',
+            '--verb="FileClose"'
+        ]
+
         subprocess.Popen(cmd)
 
 def prepFile(file_path):
