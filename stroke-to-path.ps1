@@ -15,5 +15,5 @@ ForEach($svg in $svgs) {
 }
 
 ForEach($svg in $svgs) {
-
+	& 'C:\Program Files\Inkscape\inkscape.exe' --file="$svg" --verb="ToolNode" --select="strokeToPath" --verb="StrokeToPath" --verb="FileSave" --verb="FileClose"
 }
