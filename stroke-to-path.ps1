@@ -46,6 +46,19 @@ ForEach($svg in $svgs) {
 		}
 	}
 
+	foreach ($path in $svgXml.svg.g.polyline) {
+		if ($path.stroke -ne $null) {
+			# define the path id if it doesn't exist
+			if ($path.id -eq $null) {
+				$path.SetAttribute("id", "")
+			}
+			$path.id = ("strokeToPath" + $idCounter)
+			$strokeArgs.Add('--select="strokeToPath' + $idCounter +'"')
+			$strokeArgs.Add('--verb="StrokeToPath"')
+			$idCounter++
+		}
+	}
+
 	# save the modified svg
 	$svgXML.Save($svg)
 
