@@ -1,4 +1,5 @@
 output/
+cleaned-output/
 
 # Windows image file caches
 Thumbs.db
