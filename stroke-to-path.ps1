@@ -75,8 +75,8 @@ ForEach($svg in $svgs) {
 	}
 }
 
-#ForEach($cmdArg in $cmdArgList) {
-#	echo "Executing inkscape: "
-#	echo $cmdArg
-#	& 'C:\Program Files\Inkscape\inkscape.exe' $cmdArg | Out-Null
-#}
+ForEach($cmdArg in $cmdArgList) {
+	echo "Executing inkscape: "
+	echo $cmdArg
+	& 'C:\Program Files\Inkscape\inkscape.exe' $cmdArg | Out-Null
+}
