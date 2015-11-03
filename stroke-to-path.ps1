@@ -20,28 +20,32 @@ ForEach($svg in $svgs) {
 	# i.e. - sketch:type="MSShapeGroup"
 	[xml]$svgXml = Get-Content $svg
 	
+	# remove the solid rectables in the back of the icons
+	# comment out or remove this if you are having trouble with this
 	foreach ($rect in $svgXml.svg.g.rect) {
 		if ($rect.height -eq 48 -and $rect.width -eq 48) {
-			echo "Found a rectangle.  Removing it."
 			$rect.ParentNode.RemoveChild($rect)
 		}
 	}
 
 	$strokeArgs = New-Object System.Collections.Generic.List[String]
 
-	# get the paths to check
-	$paths = $svgXml.svg.g.path, $svgXml.svg.g.polyline
-
 	$idCounter = 0
-	foreach ($path in $paths) {
+	foreach ($path in $svgXml.svg.g.path) {
 		# if the path doesn't have a stroke, ignore it
 		if ($path.stroke -ne $null) {
 
-			# define the path id if it doesn't exist
-			if ($path.id -eq $null) {
-				$path.SetAttribute("id", "")
-			}
-			$path.id = ("strokeToPath" + $idCounter)
+			$path.SetAttribute("id", "strokeToPath" + $idCounter)
+			$strokeArgs.Add('--select="strokeToPath' + $idCounter +'"')
+			$idCounter++
+		}
+	}
+
+	foreach ($path in $svgXml.svg.g.polyline) {
+		# if the path doesn't have a stroke, ignore it
+		if ($path.stroke -ne $null) {
+
+			$path.SetAttribute("id", "strokeToPath" + $idCounter)
 			$strokeArgs.Add('--select="strokeToPath' + $idCounter +'"')
 			$idCounter++
 		}
@@ -71,8 +75,8 @@ ForEach($svg in $svgs) {
 	}
 }
 
-ForEach($cmdArg in $cmdArgList) {
-	echo "Executing inkscape: "
-	echo $cmdArg
-	& 'C:\Program Files\Inkscape\inkscape.exe' $cmdArg | Out-Null
-}
+#ForEach($cmdArg in $cmdArgList) {
+#	echo "Executing inkscape: "
+#	echo $cmdArg
+#	& 'C:\Program Files\Inkscape\inkscape.exe' $cmdArg | Out-Null
+#}
