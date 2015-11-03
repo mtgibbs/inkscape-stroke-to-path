@@ -14,6 +14,10 @@ $cmdArgList = New-Object System.Collections.Generic.List[System.Object]
 
 ForEach($svg in $svgs) {
 	echo($svg)
+
+	# read the svg xml in
+	# there is currently a failure to read the .svg if an xml namespace is defined but not in the xml
+	# i.e. - sketch:type="MSShapeGroup"
 	[xml]$svgXml = Get-Content $svg
 	
 	foreach ($rect in $svgXml.svg.g.rect) {
@@ -23,27 +27,40 @@ ForEach($svg in $svgs) {
 		}
 	}
 
-	$cmdArgs = New-Object System.Collections.Generic.List[String]
-	$cmdArgs.Add('--file="' + $svg +'"')
-	$cmdArgs.Add('--verb="ToolNode"')
+	$strokeArgs = New-Object System.Collections.Generic.List[String]
 
 	$idCounter = 0
 	foreach ($path in $svgXml.svg.g.path) {
-		if ($path.id -eq $null) {
-			$path.SetAttribute("id", "")
+
+		# if the path isn't defined as a stroke, ignore it
+		if ($path.stroke -ne $null) {
+
+			# define the path id if it doesn't exist
+			if ($path.id -eq $null) {
+				$path.SetAttribute("id", "")
+			}
+			$path.id = ("strokeToPath" + $idCounter)
+			$strokeArgs.Add('--select="strokeToPath' + $idCounter +'"')
+			$strokeArgs.Add('--verb="StrokeToPath"')
+			$idCounter++
 		}
-		$path.id = ("strokeToPath" + $idCounter)
-		$cmdArgs.Add('--select="strokeToPath' + $idCounter +'"')
-		$cmdArgs.Add('--verb="StrokeToPath"')
-		$idCounter++
 	}
 
-	$cmdArgs.Add('--verb="FileSave"')
-	$cmdArgs.Add('--verb="FileClose"')
-
+	# save the modified svg
 	$svgXML.Save($svg)
 
-	$cmdArgList.Add($cmdArgs)
+	# if no paths were found as strokes, do not execute on this .svg
+	if ($idCounter -gt 0) {
+
+		$cmdArgs = New-Object System.Collections.Generic.List[String]
+		$cmdArgs.Add('--file="' + $svg +'"')
+		$cmdArgs.Add('--verb="ToolNode"')
+		$cmdArgs.AddRange($strokeArgs)
+		$cmdArgs.Add('--verb="FileSave"')
+		$cmdArgs.Add('--verb="FileClose"')
+
+		$cmdArgList.Add($cmdArgs)
+	}
 }
 
 ForEach($cmdArg in $cmdArgList) {
