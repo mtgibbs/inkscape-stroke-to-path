@@ -10,10 +10,11 @@ Copy-Item -Path $iconDirPath -Filter *.svg -Destination $outputDirectory
 
 $svgs = Get-ChildItem ($outputDirectory + "\*") -Filter *.svg
 
+
 ForEach($svg in $svgs) {
 	(Get-Content $svg).replace('<path ', '<path id="strokeToPath" ') | Set-Content $svg | Out-Null
 }
 
 ForEach($svg in $svgs) {
-	& 'C:\Program Files\Inkscape\inkscape.exe' --file="$svg" --verb="ToolNode" --select="strokeToPath" --verb="StrokeToPath" --verb="FileSave" --verb="FileClose"
+	& 'C:\Program Files\Inkscape\inkscape.exe' --file="$svg" --verb="ToolNode" --select="strokeToPath" --verb="StrokeToPath" --verb="FileSave" --verb="FileClose" --verb="Close" | Out-Null
 }
