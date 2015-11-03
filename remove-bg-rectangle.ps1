@@ -23,6 +23,4 @@ ForEach($svg in $svgs) {
 	}
 
 	$svgXML.Save($svg)
-
-	#(Get-Content $svg).replace('<path ', '<path id="strokeToPath" ') | Set-Content $svg | Out-Null
 }
