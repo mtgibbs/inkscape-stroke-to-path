@@ -57,7 +57,7 @@ ForEach($svg in $svgs) {
 		$cmdArgs.Add('--verb="ToolNode"')
 		$cmdArgs.AddRange($strokeArgs)
 		$cmdArgs.Add('--verb="FileSave"')
-		$cmdArgs.Add('--verb="FileClose"')
+		$cmdArgs.Add('--verb="FileQuit"')
 
 		$cmdArgList.Add($cmdArgs)
 	}
@@ -68,3 +68,5 @@ ForEach($cmdArg in $cmdArgList) {
 	echo $cmdArg
 	& 'C:\Program Files\Inkscape\inkscape.exe' $cmdArg | Out-Null
 }
+
+# Get-Process inkscape | Foreach-Object { $_.CloseMainWindow() | Out-Null } | stop-process –force
