@@ -29,10 +29,12 @@ ForEach($svg in $svgs) {
 
 	$strokeArgs = New-Object System.Collections.Generic.List[String]
 
+	# get the paths to check
+	$paths = $svgXml.svg.g.path, $svgXml.svg.g.polyline
+
 	$idCounter = 0
-	foreach ($path in $svgXml.svg.g.path) {
-
-		# if the path isn't defined as a stroke, ignore it
+	foreach ($path in $paths) {
+		# if the path doesn't have a stroke, ignore it
 		if ($path.stroke -ne $null) {
 
 			# define the path id if it doesn't exist
@@ -41,20 +43,6 @@ ForEach($svg in $svgs) {
 			}
 			$path.id = ("strokeToPath" + $idCounter)
 			$strokeArgs.Add('--select="strokeToPath' + $idCounter +'"')
-			$strokeArgs.Add('--verb="StrokeToPath"')
-			$idCounter++
-		}
-	}
-
-	foreach ($path in $svgXml.svg.g.polyline) {
-		if ($path.stroke -ne $null) {
-			# define the path id if it doesn't exist
-			if ($path.id -eq $null) {
-				$path.SetAttribute("id", "")
-			}
-			$path.id = ("strokeToPath" + $idCounter)
-			$strokeArgs.Add('--select="strokeToPath' + $idCounter +'"')
-			$strokeArgs.Add('--verb="StrokeToPath"')
 			$idCounter++
 		}
 	}
@@ -69,6 +57,13 @@ ForEach($svg in $svgs) {
 		$cmdArgs.Add('--file="' + $svg +'"')
 		$cmdArgs.Add('--verb="ToolNode"')
 		$cmdArgs.AddRange($strokeArgs)
+		$cmdArgs.Add('--verb="StrokeToPath"')
+
+		# union the paths together if there are more than one
+		# this may be completely unnecessary, will check font output and then decide
+		if ($idCounter -gt 1) {
+			$cmdArgs.Add('--verb="SelectionUnion"')
+		}
 		$cmdArgs.Add('--verb="FileSave"')
 		$cmdArgs.Add('--verb="FileQuit"')
 
@@ -81,5 +76,3 @@ ForEach($cmdArg in $cmdArgList) {
 	echo $cmdArg
 	& 'C:\Program Files\Inkscape\inkscape.exe' $cmdArg | Out-Null
 }
-
-# Get-Process inkscape | Foreach-Object { $_.CloseMainWindow() | Out-Null } | stop-process –force
