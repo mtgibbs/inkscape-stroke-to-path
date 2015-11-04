@@ -77,6 +77,16 @@ ForEach($svg in $svgs) {
 			}
 		}
 
+		foreach ($path in $svgXml.svg.g.polygon) {
+			# if the path doesn't have a stroke, ignore it
+			if ($path.stroke -ne $null) {
+
+				$path.SetAttribute("id", "strokeToPath" + $idCounter)
+				$strokeArgs.Add('--select="strokeToPath' + $idCounter +'"')
+				$idCounter++
+			}
+		}
+
 		# save the modified svg
 		$svgXML.Save($svg)
 
