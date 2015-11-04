@@ -1,5 +1,6 @@
 output/
 cleaned-output/
+nested-g-node-svgs/
 
 # Windows image file caches
 Thumbs.db
