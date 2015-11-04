@@ -13,19 +13,32 @@ $svgs = Get-ChildItem ($outputDirectory + "\*") -Filter *.svg
 $cmdArgList = New-Object System.Collections.Generic.List[System.Object]
 
 ForEach($svg in $svgs) {
-	echo($svg)
+	Write-Host $svg
 
 	# read the svg xml in
 	# there is currently a failure to read the .svg if an xml namespace is defined but not in the xml
 	# i.e. - sketch:type="MSShapeGroup"
 	Try {
-		[xml]$svgXml = Get-Content $svg
+		[xml]$svgXml = [xml]([System.IO.File]::ReadAllText($svg))
+
+		# Search for nested <g> elements and take their children and move them to the parent <g> element
+		foreach ($g in $svgXml.svg.g.g) {
+			$parentNode = $g.ParentNode
+			if ($g.HasChildNodes) {
+				# TODO: Figure out how to suppress the console output of this call
+				$nodes = $g.SelectNodes("*")
+				foreach ($child in $nodes) {
+					[void] $parentNode.AppendChild($child)
+				}
+				$parentNode.RemoveChild($g)
+			}
+		}
 
 		# remove the solid rectables in the back of the icons
 		# comment out or remove this if you are having trouble with this
 		foreach ($rect in $svgXml.svg.g.rect) {
 			if ($rect.height -eq 48 -and $rect.width -eq 48) {
-				$rect.ParentNode.RemoveChild($rect)
+				[void] $rect.ParentNode.RemoveChild($rect)
 			}
 		}
 
