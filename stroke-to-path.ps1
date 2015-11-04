@@ -120,7 +120,7 @@ ForEach($svg in $svgs) {
 }
 
 ForEach($cmdArg in $cmdArgList) {
-	Write-Host "Executing inkscape: "
-	Write-Host $cmdArg -foregroundcolor "yellow"
-	& 'C:\Program Files\Inkscape\inkscape.exe' $cmdArg | Out-Null
+	$inkscapeExePath = "C:\Program Files\Inkscape\inkscape.exe"
+	Write-Host "&" $inkscapeExePath $cmdArg -foregroundcolor "yellow"
+	& $inkscapeExePath $cmdArg | Out-Null
 }
