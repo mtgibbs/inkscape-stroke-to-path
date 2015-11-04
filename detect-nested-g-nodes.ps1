@@ -19,6 +19,7 @@ ForEach($svg in $svgs) {
 		}
 	}
 	Catch [System.Exception] {
+		Write-Host $svg -ForegroundColor "red"
 		Write-Host $_.Exception.Message -foregroundcolor "red"
 	}
 }
