@@ -81,10 +81,11 @@ ForEach($svg in $svgs) {
 		$svgXML.Save($svg)
 
 		# if no paths were found as strokes, do not execute on this .svg
-		if ($idCounter -gt 0) {
 
-			$cmdArgs = New-Object System.Collections.Generic.List[String]
-			$cmdArgs.Add('--file="' + $svg +'"')
+		$cmdArgs = New-Object System.Collections.Generic.List[String]
+		$cmdArgs.Add('--file="' + $svg +'"')
+
+		if ($idCounter -gt 0) {
 			$cmdArgs.Add('--verb="ToolNode"')
 			$cmdArgs.AddRange($strokeArgs)
 			$cmdArgs.Add('--verb="StrokeToPath"')
@@ -94,12 +95,13 @@ ForEach($svg in $svgs) {
 			if ($idCounter -gt 1) {
 				$cmdArgs.Add('--verb="SelectionUnion"')
 			}
-			$cmdArgs.Add('--verb="FileSave"')
-			$cmdArgs.Add('--verb="FileQuit"')
-
-			$cmdArgList.Add($cmdArgs)
 		}
 
+		$cmdArgs.Add('--verb="FitCanvasToDrawing"')
+		$cmdArgs.Add('--verb="FileSave"')
+		$cmdArgs.Add('--verb="FileQuit"')
+
+		$cmdArgList.Add($cmdArgs)
 	}
 	Catch [System.Exception] {
 		Write-Host $_.Exception.Message -foregroundcolor "red"
