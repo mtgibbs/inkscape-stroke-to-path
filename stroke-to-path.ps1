@@ -45,6 +45,8 @@ ForEach($svg in $svgs) {
 		$strokeArgs = New-Object System.Collections.Generic.List[String]
 
 		$idCounter = 0
+
+		# TODO: Really figure out how to combine all of these into one pass
 		foreach ($path in $svgXml.svg.g.path) {
 			# if the path doesn't have a stroke, ignore it
 			if ($path.stroke -ne $null) {
@@ -56,6 +58,16 @@ ForEach($svg in $svgs) {
 		}
 
 		foreach ($path in $svgXml.svg.g.polyline) {
+			# if the path doesn't have a stroke, ignore it
+			if ($path.stroke -ne $null) {
+
+				$path.SetAttribute("id", "strokeToPath" + $idCounter)
+				$strokeArgs.Add('--select="strokeToPath' + $idCounter +'"')
+				$idCounter++
+			}
+		}
+
+		foreach ($path in $svgXml.svg.g.line) {
 			# if the path doesn't have a stroke, ignore it
 			if ($path.stroke -ne $null) {
 
