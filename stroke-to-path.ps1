@@ -23,8 +23,8 @@ ForEach($svg in $svgs) {
 
 		# resize the canvas to center on
 		foreach ($svgNode in $svgXml.svg) {
-			$svgNode.SetAttribute("viewBox", "0 0 30 30")
-			$svgNode.SetAttribute("enable-background", "new 0 0 30 30")
+			$svgNode.SetAttribute("viewBox", "0 0 28 28")
+			$svgNode.SetAttribute("enable-background", "new 0 0 28 28")
 		}
 
 		# Search for nested <g> elements and take their children and move them to the parent <g> element
