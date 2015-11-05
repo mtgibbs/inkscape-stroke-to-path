@@ -84,8 +84,14 @@ ForEach($svg in $svgs) {
 			foreach ($tar in $allNodes) {
 				$cmdArgs.Add('--select="' + $tar + '"')
 			}
-
+			
 			$cmdArgs.Add('--verb="AlignVerticalHorizontalCenter"')
+
+			$cmdArgs.Add('--verb="EditDeselect"')
+			$cmdArgs.Add('--verb="ToolNode"')
+			foreach ($tar in $allNodes) {
+				$cmdArgs.Add('--select="' + $tar + '"')
+			}
 			$cmdArgs.Add('--verb="SelectionUnion"')
 		}
 		
