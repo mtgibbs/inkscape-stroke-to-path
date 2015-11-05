@@ -49,7 +49,7 @@ ForEach($svg in $svgs) {
 		}
 
 		$strokeToPathTargets = New-Object System.Collections.Generic.List[String]
-		$unionTargets = New-Object System.Collections.Generic.List[String]
+		$allNodes = New-Object System.Collections.Generic.List[String]
 
 		$idCounter = 0
 		foreach ($node in $svgXml.svg.g.SelectNodes("*") ) {
@@ -58,7 +58,7 @@ ForEach($svg in $svgs) {
 			if ($node.stroke -ne $null) {
 				$strokeToPathTargets.Add($nodeId)
 			}
-			$unionTargets.Add($nodeId)
+			$allNodes.Add($nodeId)
 			$idCounter++
 		}
 
@@ -79,34 +79,18 @@ ForEach($svg in $svgs) {
 			$cmdArgs.Add('--verb="StrokeToPath"')
 		}
 
-		if ($unionTargets.Count -gt 0) {
+		if ($allNodes.Count -gt 0) {
 			$cmdArgs.Add('--verb="EditDeselect"')
-			foreach ($tar in $unionTargets) {
+			foreach ($tar in $allNodes) {
 				$cmdArgs.Add('--select="' + $tar + '"')
 			}
+
+			$cmdArgs.Add('--verb="AlignVerticalHorizontalCenter"')
 			$cmdArgs.Add('--verb="SelectionUnion"')
 		}
-
-		$cmdArgs.Add('--verb="AlignVerticalHorizontalCenter"')
-
-		#if ($idCounter -gt 0) {
-		#	$cmdArgs.Add('--verb="ToolNode"')
-		#	$cmdArgs.AddRange($strokeArgs)
-		#	$cmdArgs.Add('--verb="StrokeToPath"')
-
-			# union the paths together if there are more than one
-			# this may be completely unnecessary, will check font output and then decide
-			#if ($idCounter -gt 1) {
-			#	$cmdArgs.Add('--verb="SelectionUnion"')
-			#}
 		
-		## EditGuidesAroundPage
-		## --verb=EditDeselect
-
-		#$cmdArgs.Add('--verb="EditSelectAll"')
-		#$cmdArgs.Add('--verb="AlignVerticalHorizontalCenter"')
-		#$cmdArgs.Add('--verb="FileSave"')
-		#$cmdArgs.Add('--verb="FileQuit"')
+		$cmdArgs.Add('--verb="FileSave"')
+		$cmdArgs.Add('--verb="FileQuit"')
 
 		$cmdArgList.Add($cmdArgs)
 	}
@@ -119,5 +103,5 @@ ForEach($svg in $svgs) {
 ForEach($cmdArg in $cmdArgList) {
 	$inkscapeExePath = "C:\Program Files\Inkscape\inkscape.exe"
 	Write-Host "&" $inkscapeExePath $cmdArg -foregroundcolor "yellow"
-	& $inkscapeExePath $cmdArg #| Out-Null
+	& $inkscapeExePath $cmdArg | Out-Null
 }
