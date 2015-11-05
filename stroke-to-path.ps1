@@ -21,6 +21,12 @@ ForEach($svg in $svgs) {
 	Try {
 		[xml]$svgXml = [xml]([System.IO.File]::ReadAllText($svg))
 
+		# resize the canvas to center on
+		foreach ($svgNode in $svgXml.svg) {
+			$svgNode.SetAttribute("viewBox", "0 0 30 30")
+			$svgNode.SetAttribute("enable-background", "new 0 0 30 30")
+		}
+
 		# Search for nested <g> elements and take their children and move them to the parent <g> element
 		foreach ($g in $svgXml.svg.g.g) {
 			$parentNode = $g.ParentNode
@@ -42,74 +48,65 @@ ForEach($svg in $svgs) {
 			}
 		}
 
-		$strokeArgs = New-Object System.Collections.Generic.List[String]
+		$strokeToPathTargets = New-Object System.Collections.Generic.List[String]
+		$unionTargets = New-Object System.Collections.Generic.List[String]
 
 		$idCounter = 0
-
-		# TODO: Really figure out how to combine all of these into one pass
-		foreach ($path in $svgXml.svg.g.path) {
-			# if the path doesn't have a stroke, ignore it
-			if ($path.stroke -ne $null) {
-
-				$path.SetAttribute("id", "strokeToPath" + $idCounter)
-				$strokeArgs.Add('--select="strokeToPath' + $idCounter +'"')
-				$idCounter++
+		foreach ($node in $svgXml.svg.g.SelectNodes("*") ) {
+			$nodeId = "strokeToPath" + $idCounter
+			$node.SetAttribute("id", $nodeId)
+			if ($node.stroke -ne $null) {
+				$strokeToPathTargets.Add($nodeId)
 			}
+			$unionTargets.Add($nodeId)
+			$idCounter++
 		}
 
-		foreach ($path in $svgXml.svg.g.polyline) {
-			# if the path doesn't have a stroke, ignore it
-			if ($path.stroke -ne $null) {
-
-				$path.SetAttribute("id", "strokeToPath" + $idCounter)
-				$strokeArgs.Add('--select="strokeToPath' + $idCounter +'"')
-				$idCounter++
-			}
-		}
-
-		foreach ($path in $svgXml.svg.g.line) {
-			# if the path doesn't have a stroke, ignore it
-			if ($path.stroke -ne $null) {
-
-				$path.SetAttribute("id", "strokeToPath" + $idCounter)
-				$strokeArgs.Add('--select="strokeToPath' + $idCounter +'"')
-				$idCounter++
-			}
-		}
-
-		foreach ($path in $svgXml.svg.g.polygon) {
-			# if the path doesn't have a stroke, ignore it
-			if ($path.stroke -ne $null) {
-
-				$path.SetAttribute("id", "strokeToPath" + $idCounter)
-				$strokeArgs.Add('--select="strokeToPath' + $idCounter +'"')
-				$idCounter++
-			}
-		}
+		Write-Host $strokeToPathTargets
+		Write-Host $unionTargets
 
 		# save the modified svg
 		$svgXML.Save($svg)
 
-		# if no paths were found as strokes, do not execute on this .svg
-
 		$cmdArgs = New-Object System.Collections.Generic.List[String]
 		$cmdArgs.Add('--file="' + $svg +'"')
 
-		if ($idCounter -gt 0) {
+		if ($strokeToPathTargets.Count -gt 0) {
 			$cmdArgs.Add('--verb="ToolNode"')
-			$cmdArgs.AddRange($strokeArgs)
+			foreach ($tar in $strokeToPathTargets) {
+				$cmdArgs.Add('--select="' + $tar + '"')
+			}
 			$cmdArgs.Add('--verb="StrokeToPath"')
+		}
+
+		if ($unionTargets.Count -gt 0) {
+			$cmdArgs.Add('--verb="EditDeselect"')
+			foreach ($tar in $unionTargets) {
+				$cmdArgs.Add('--select="' + $tar + '"')
+			}
+			$cmdArgs.Add('--verb="SelectionUnion"')
+		}
+
+		$cmdArgs.Add('--verb="AlignVerticalHorizontalCenter"')
+
+		#if ($idCounter -gt 0) {
+		#	$cmdArgs.Add('--verb="ToolNode"')
+		#	$cmdArgs.AddRange($strokeArgs)
+		#	$cmdArgs.Add('--verb="StrokeToPath"')
 
 			# union the paths together if there are more than one
 			# this may be completely unnecessary, will check font output and then decide
-			if ($idCounter -gt 1) {
-				$cmdArgs.Add('--verb="SelectionUnion"')
-			}
-		}
+			#if ($idCounter -gt 1) {
+			#	$cmdArgs.Add('--verb="SelectionUnion"')
+			#}
+		
+		## EditGuidesAroundPage
+		## --verb=EditDeselect
 
-		$cmdArgs.Add('--verb="FitCanvasToDrawing"')
-		$cmdArgs.Add('--verb="FileSave"')
-		$cmdArgs.Add('--verb="FileQuit"')
+		#$cmdArgs.Add('--verb="EditSelectAll"')
+		#$cmdArgs.Add('--verb="AlignVerticalHorizontalCenter"')
+		#$cmdArgs.Add('--verb="FileSave"')
+		#$cmdArgs.Add('--verb="FileQuit"')
 
 		$cmdArgList.Add($cmdArgs)
 	}
@@ -122,5 +119,5 @@ ForEach($svg in $svgs) {
 ForEach($cmdArg in $cmdArgList) {
 	$inkscapeExePath = "C:\Program Files\Inkscape\inkscape.exe"
 	Write-Host "&" $inkscapeExePath $cmdArg -foregroundcolor "yellow"
-	& $inkscapeExePath $cmdArg | Out-Null
+	& $inkscapeExePath $cmdArg #| Out-Null
 }
