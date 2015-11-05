@@ -62,9 +62,6 @@ ForEach($svg in $svgs) {
 			$idCounter++
 		}
 
-		Write-Host $strokeToPathTargets
-		Write-Host $unionTargets
-
 		# save the modified svg
 		$svgXML.Save($svg)
 
@@ -87,6 +84,9 @@ ForEach($svg in $svgs) {
 			
 			$cmdArgs.Add('--verb="AlignVerticalHorizontalCenter"')
 
+			# delect everything and select it again just to make sure
+			# there were some cases where they didn't union correctly
+			# I think this is largely due to phantom paths
 			$cmdArgs.Add('--verb="EditDeselect"')
 			$cmdArgs.Add('--verb="ToolNode"')
 			foreach ($tar in $allNodes) {
