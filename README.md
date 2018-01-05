@@ -2,6 +2,8 @@
 
 Powershell script leveraging [inkscape](https://inkscape.org)'s command line interface to modify .svg files of icons from strokes to paths for input into a [font engine workflow](https://github.com/sapegin/grunt-webfont).
 
+For a Linux solution, please take a look at [AutomatedStrokeToPath](https://github.com/kd96/AutomatedStrokeToPath).
+
 ### Usage
 
 Make sure that you have [inkscape](https://inkscape.org) installed on your machine.  
